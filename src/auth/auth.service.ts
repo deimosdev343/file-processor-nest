@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { UsersService } from 'src/users/users.service';
@@ -20,7 +20,13 @@ export class AuthService {
     const user = await this.users.create(email, hash);
     return this.sign(user.id, user.email);
   }
-
+  async login(email: string, password: string) {
+    const user = await this.users.findByEmail(email);
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    return this.sign(user.id, user.email);
+  }
 
   private sign(sub: number, email: string) {
     return { access_token: this.jwt.sign({ sub, email }) };
