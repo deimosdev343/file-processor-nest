@@ -18,6 +18,6 @@ export class UsersService {
   }
 
   create(email: string, passwordHash: string) {
-    return this.repo.save(this.repo.create({ email, password: passwordHash }));
+    return this.repo.save(this.repo.create({ email, password: passwordHash, admin: false, isActive: true }));
   }
 }
