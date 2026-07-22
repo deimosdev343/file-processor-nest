@@ -12,10 +12,17 @@ export class TormentNexusService {
     })
   }
 
-   async summarizeDocument(prompt: string): Promise<string> {
+   async summarizeDocument(csvContent: string): Promise<string> {
     const res = await this.client.chat.completions.create({
       model: "gpt-4o",
-      messages: [{ role: 'user', content: prompt }],
+      messages: [
+        {
+        role: 'system',
+        content:
+          'You are given the raw contents of a CSV file. Summarize the data: describe the columns, the number of rows, and any notable patterns or outliers.',
+        },
+        { role: 'user', content: csvContent },
+      ],
     });
     return res.choices[0].message.content ?? '';
   }
