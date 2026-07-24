@@ -5,7 +5,7 @@ import {ConfigModule, ConfigService} from '@nestjs/config';
 import {TypeOrmModule} from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-import { TormentNexusModule } from './torment-nexus/torment-nexus.module';
+import { OpenAiModule } from './open-ai/open-ai.module';
 
 @Module({
   imports: [
@@ -25,7 +25,7 @@ import { TormentNexusModule } from './torment-nexus/torment-nexus.module';
     }), 
     UsersModule, 
     AuthModule,
-    TormentNexusModule     
+    OpenAiModule,
   ],
   controllers: [AppController],
   providers: [AppService],
