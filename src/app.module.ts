@@ -6,6 +6,7 @@ import {TypeOrmModule} from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { OpenAiModule } from './open-ai/open-ai.module';
+import { DatasetAnalysisModule } from './dataset-analysis/dataset-analysis.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { OpenAiModule } from './open-ai/open-ai.module';
     UsersModule, 
     AuthModule,
     OpenAiModule,
+    DatasetAnalysisModule,
   ],
   controllers: [AppController],
   providers: [AppService],
