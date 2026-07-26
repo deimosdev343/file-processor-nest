@@ -18,6 +18,21 @@ export class CsvProfileService {
 
   constructor(
     @Inject(dataAnalysisConfig.KEY) private readonly options: ConfigType<typeof dataAnalysisConfig>
-    
   ) {}
+
+  profile(csvContent: string) {}
+
+  private parseOrThrow(csvContent: string): Record<string, string> {
+    try {
+      return parse(csvContent, {
+        columns: true,
+        skipEmptyLines: true,
+        trim: true,
+        bom: true
+      }) as Record<string, string>
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "unknown parse faliure";
+      throw new UnprocessableEntityException(`Could not parse CSV :${message}`);
+    }
+  }
 }
