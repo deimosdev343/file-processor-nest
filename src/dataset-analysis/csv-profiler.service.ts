@@ -22,17 +22,34 @@ export class CsvProfileService {
 
   profile(csvContent: string) {}
 
-  private parseOrThrow(csvContent: string): Record<string, string> {
+  private parseOrThrow(csvContent: string): Record<string, string>[] {
     try {
-      return parse(csvContent, {
+      return parse<Record<string, string>>(csvContent, {
         columns: true,
         skipEmptyLines: true,
         trim: true,
         bom: true
-      }) as Record<string, string>
+      })
     } catch (err) {
       const message = err instanceof Error ? err.message : "unknown parse faliure";
       throw new UnprocessableEntityException(`Could not parse CSV :${message}`);
     }
   }
+
+  private inferType(values: string[]): InferredType {
+    if (values.length === 0) return 'string';
+    const every = (fn: (v: string) => boolean) => values.every((v) => fn(v.trim()));
+ 
+    if (every((v) => /^-?\d+$/.test(v))) return 'integer';
+    if (every((v) => v !== '' && Number.isFinite(Number(v)))) return 'float';
+    if (every((v) => BOOL_SET.has(v.toLowerCase()))) return 'boolean';
+    if (every((v) => DATE_RE.test(v) && !Number.isNaN(Date.parse(v)))) return 'date';
+    return 'string';
+  }
+
+  private quantile(sorted: number[], q: number) {
+    const pos = (sorted.length)
+  }
+
+
 }
