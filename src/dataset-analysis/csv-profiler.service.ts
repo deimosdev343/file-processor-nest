@@ -47,6 +47,27 @@ export class CsvProfileService {
     return 'string';
   }
 
+    private summarizeNumeric(values: string[]): ColumnProfile['numeric'] {
+    const nums = values.map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+    if (nums.length === 0) return undefined;
+ 
+    const mean = nums.reduce((a, b) => a + b, 0) / nums.length;
+    const variance = nums.reduce((a, b) => a + (b - mean) ** 2, 0) / nums.length;
+    const stddev = Math.sqrt(variance);
+ 
+    return {
+      min: nums[0],
+      max: nums[nums.length - 1],
+      mean: this.round(mean),
+      p50: this.quantile(nums, 0.5),
+      p95: this.quantile(nums, 0.95),
+      stddev: this.round(stddev),
+      outlierCount:
+        stddev > 0 ? nums.filter((n) => Math.abs((n - mean) / stddev) > 3).length : 0,
+    };
+  }
+
+  
   private quantile(sorted: number[], q: number) {
     const pos = (sorted.length -1) *q;
     const lo = Math.floor(pos);

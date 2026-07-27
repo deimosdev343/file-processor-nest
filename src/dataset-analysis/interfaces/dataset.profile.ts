@@ -7,7 +7,7 @@ export interface NumericSummary {
   p50: number;
   p95: number;
   stddev: number;
-  outlierCounter: number;
+  outlierCount: number;
 }
 
 export interface ColumnProfile {
