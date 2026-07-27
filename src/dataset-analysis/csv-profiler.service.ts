@@ -48,8 +48,14 @@ export class CsvProfileService {
   }
 
   private quantile(sorted: number[], q: number) {
-    const pos = (sorted.length)
+    const pos = (sorted.length -1) *q;
+    const lo = Math.floor(pos);
+    const hi = Math.ceil(pos);
+    return lo === hi ? sorted[lo] : sorted[lo] + (sorted[hi] - sorted[lo]) * (pos - lo);
   }
 
+  private round(n: number): number {
+    return Number(n.toFixed(4));
+  }
 
 }
