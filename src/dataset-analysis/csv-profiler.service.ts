@@ -21,7 +21,39 @@ export class CsvProfileService {
   ) {}
 
   profile(csvContent: string) {}
+  
 
+  private profileColum(name: string, rows: Record<string, string>[]): ColumnProfile {
+    const raw = rows.map((r) => r[name] ?? '');
+    const nonEmpty = raw.filter((v) => v !== '');
+    const nullCount = raw.length - nonEmpty.length;
+
+    const counts = new Map<string, number>();
+    for(const value of nonEmpty) counts.set(value, (counts.get(value) ?? 0) + 1);
+
+    const inferredType = this.inferType(nonEmpty.slice(0, TYPE_SAMPLE_LIMIT));
+ 
+    const column: ColumnProfile = {
+      name,
+      inferredType,
+      nullCount,
+      nullFraction: raw.length ? this.round(nullCount / raw.length) : 0,
+      distinctCount: counts.size,
+      distinctFraction: nonEmpty.length ? this.round(counts.size / nonEmpty.length) : 0,
+      sampleValues: [...counts.keys()].slice(0, 3),
+    };
+
+    if (inferredType === 'integer' || inferredType === 'float') {
+      column.numeric = this.summarizeNumeric(nonEmpty);
+    } else if(column.distinctCount <= 50) {
+      column.topValues = [...counts.entries()]
+        .sort((a,b) => b[1] - a[1])
+        .slice(0, this.options.topK)
+        .map(([value, count]) => ({ value, count }));
+    }
+    return column;
+  }
+  
   private parseOrThrow(csvContent: string): Record<string, string>[] {
     try {
       return parse<Record<string, string>>(csvContent, {
@@ -67,7 +99,7 @@ export class CsvProfileService {
     };
   }
 
-  
+
   private quantile(sorted: number[], q: number) {
     const pos = (sorted.length -1) *q;
     const lo = Math.floor(pos);
