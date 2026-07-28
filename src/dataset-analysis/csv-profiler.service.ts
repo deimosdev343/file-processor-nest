@@ -20,10 +20,27 @@ export class CsvProfileService {
     @Inject(dataAnalysisConfig.KEY) private readonly options: ConfigType<typeof dataAnalysisConfig>
   ) {}
 
-  profile(csvContent: string) {}
+  profile(csvContent: string) {
+    const records = this.parseOrThrow(csvContent);
+
+    const truncated = records.length > this.options.maxRowsProfiled;
+    const rows = truncated ? records.slice(0, this.options.maxRowsProfiled) : records;
+    const headers = rows.length ? Object.keys(rows[0]) : [];
+
+    if(headers.length === 0) {
+      throw new UnprocessableEntityException("CSV contains no parseable headers row")
+    }
+      return {
+      rowCount: records.length,
+      columnCount: headers.length,
+      truncated,
+      columns: headers.map((name) => this.profileColumn(name, rows)),
+      sampleRows: rows.slice(0, this.options.sampleRows),
+    };
+  }
   
 
-  private profileColum(name: string, rows: Record<string, string>[]): ColumnProfile {
+  private profileColumn(name: string, rows: Record<string, string>[]): ColumnProfile {
     const raw = rows.map((r) => r[name] ?? '');
     const nonEmpty = raw.filter((v) => v !== '');
     const nullCount = raw.length - nonEmpty.length;
@@ -53,7 +70,7 @@ export class CsvProfileService {
     }
     return column;
   }
-  
+
   private parseOrThrow(csvContent: string): Record<string, string>[] {
     try {
       return parse<Record<string, string>>(csvContent, {
