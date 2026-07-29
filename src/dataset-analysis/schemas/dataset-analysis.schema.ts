@@ -42,3 +42,17 @@ export const MetricSchema = z.object({
   confidence: z.enum(['high', 'medium', 'low']),
 });
 
+
+export const DatasetAnalysisSchema = z.object({
+  domain: z.string().describe('What subject area this dataset comes from.'),
+  grain: z.string().describe('What one row represents, e.g. "one row per order line item".'),
+  primaryKeyCandidates: z.array(z.string()),
+  timeColumn: z.string().nullable(),
+  columns: z.array(ColumnAnalysisSchema),
+  metrics: z.array(MetricSchema),
+  caveats: z.array(z.string()),
+});
+ 
+export type ColumnAnalysis = z.infer<typeof ColumnAnalysisSchema>;
+export type Metric = z.infer<typeof MetricSchema>;
+export type DatasetAnalysis = z.infer<typeof DatasetAnalysisSchema>;
