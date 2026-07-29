@@ -5,7 +5,7 @@ import {
   ServiceUnavailableException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { ConfigType } from '@nestjs/config';
+import  type { ConfigType } from '@nestjs/config';
 import OpenAI from 'openai';
 import { zodResponseFormat } from 'openai/helpers/zod';
 
@@ -37,4 +37,11 @@ export interface DatasetAnalysisResult {
 export class DatasetAnalysisService {
   private readonly logger = new Logger(DatasetAnalysisService.name);
   
+  constructor(
+    @Inject(OPENAI_CLIENT) private readonly openai: OpenAI,
+    @Inject(DatasetAnalysisConfig.KEY) private readonly options: ConfigType<typeof DatasetAnalysisConfig>
+  ) {
+
+  }
+
 }
