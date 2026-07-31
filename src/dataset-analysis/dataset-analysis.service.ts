@@ -40,8 +40,33 @@ export class DatasetAnalysisService {
   constructor(
     @Inject(OPENAI_CLIENT) private readonly openai: OpenAI,
     @Inject(DatasetAnalysisConfig.KEY) private readonly options: ConfigType<typeof DatasetAnalysisConfig>
-  ) {
+  ) {}
 
+  private async interpret(profile: DatasetProfile) {
+    try {
+      const completion = await this.openai.chat.completions.parse({
+      model: this.options.model,
+      messages: [
+        {role: 'system', content: SYSTEM_PROMPT},
+        {role: 'user', content: JSON.stringify(profile)}
+      ],
+      response_format: zodResponseFormat(DatasetAnalysisSchema, 'dataset_analysis')
+    });
+    const message = completion.choices[0]?.message;
+
+    if(message?.refusal) {
+      throw new UnprocessableEntityException("Model declined to process this file");
+    }
+    if(!message?.parsed) {
+      throw new ServiceUnavailableException("Model returned no parsable analysis");
+    }
+    return message.parsed;
+    } catch (err) {
+      if (err instanceof OpenAI.APIError) {
+        this.logger.error(`OpenAI ${err.status}: ${err.message}`);
+        throw new ServiceUnavailableException('Upstream analysis provider is unavailable.');
+      }
+      throw err;
+    }
   }
-
 }
