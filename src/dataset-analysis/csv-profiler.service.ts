@@ -78,8 +78,8 @@ export class CsvProfileService {
           skipEmptyLines: true,
           trim: true,
           bom: true,
-          relax_quotes: true // hebrew abrevations are litreally just quotes
-          //and instead of using the actual character for that they use the ascII character because fuck you
+          relax_column_count: true, //dipshits adding extra commas 
+          relax_quotes: true //  instead of using the actual character for he abreviation they use the ascII character because fuck you
         })
       } catch (err) {
         const message = err instanceof Error ? err.message : "unknown parse faliure";
