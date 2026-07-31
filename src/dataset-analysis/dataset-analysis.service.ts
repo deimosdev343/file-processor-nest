@@ -43,13 +43,11 @@ export class DatasetAnalysisService {
      private readonly profiler: CsvProfileService,
   ) {}
   async analyze(csvContent: string) : Promise<DatasetAnalysisResult> {
-    const started = Date.now();
     const profile =  this.profiler.profile(csvContent);
     const analysis = await this.interpret(profile);
-    const known = new Set(profile.columns.map(c => c.name));
     return { profile, analysis };
   }
-  
+
   private async interpret(profile: DatasetProfile) {
     try {
       const completion = await this.openai.chat.completions.parse({
