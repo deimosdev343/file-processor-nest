@@ -15,6 +15,7 @@ const TYPE_SAMPLE_LIMIT = 5_000;
 @Injectable()
 export class CsvProfileService {
   private readonly logger = new Logger(CsvProfileService.name);
+  private static readonly MAX_SKIPPED_TRACKED = 100;
 
   constructor(
     @Inject(dataAnalysisConfig.KEY) private readonly options: ConfigType<typeof dataAnalysisConfig>
@@ -61,11 +62,24 @@ export class CsvProfileService {
     let skippedCount = 0;
 
     parser.on('skip', (err: { lines: number; code: string }) => {
-    skippedCount++;
-    skippedLines.push(err.lines);
-  });
+      skippedCount++;
+      if (skippedLines.length < CsvProfileService.MAX_SKIPPED_TRACKED) {
+        skippedLines.push(err.lines);
+      }
+    });
 
-
+    try {
+      for await(const record of parser) {
+        validRowCount++;
+        if(rows.length < this.options.maxRowsProfiled) {
+          rows.push(record as Record<string, string>);
+        }
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'unknown parse failure';
+      throw new UnprocessableEntityException(`Could not parse CSV: ${message}`);
+    }
+    return { rows, validRowCount, skippedCount, skippedLines };
   }
 
   private profileColumn(name: string, rows: Record<string, string>[]): ColumnProfile {
