@@ -39,6 +39,28 @@ export class CsvProfileService {
     };
   }
   
+  private async collectRows(csvContent:string) :Promise<{
+    rows: Record<string, string>[],
+    validRowCount:number,
+    skippedCount:number,
+    skippedLines: number[]
+  }> {
+    const parser = parse(csvContent, {
+      columns: true,
+      skipEmptyLines: true,
+      trim: true,
+      bom: true,
+      relax_column_count: true, //dipshits adding extra commas 
+      relax_quotes: true //  instead of using the actual character for he abreviation they use the ascII character because fuck you
+        
+    });
+
+    const rows: Record<string, string>[] = [];
+    const skippedLines: number[] = [];
+    let validRowCount = 0;
+    let skippedCount = 0;
+    
+  }
 
   private profileColumn(name: string, rows: Record<string, string>[]): ColumnProfile {
     const raw = rows.map((r) => r[name] ?? '');
