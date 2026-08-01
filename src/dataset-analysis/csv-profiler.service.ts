@@ -21,20 +21,22 @@ export class CsvProfileService {
     @Inject(dataAnalysisConfig.KEY) private readonly options: ConfigType<typeof dataAnalysisConfig>
   ) {}
 
-  profile(csvContent: string) {
-    const records = this.parseOrThrow(csvContent);
-
-    const truncated = records.length > this.options.maxRowsProfiled;
-    const rows = truncated ? records.slice(0, this.options.maxRowsProfiled) : records;
+  async profile(csvContent: string): Promise<DatasetProfile> {
+    const { rows, validRowCount, skippedCount, skippedLines } = await this.collectRows(csvContent);
     const headers = rows.length ? Object.keys(rows[0]) : [];
-
-    if(headers.length === 0) {
-      throw new UnprocessableEntityException("CSV contains no parseable headers row")
+    if(headers.length == 0) {
+      throw new UnprocessableEntityException("CSV contains no parseable data rows.");
     }
-      return {
-      rowCount: records.length,
+    const truncated = validRowCount > this.options.maxRowsProfiled;
+    if(truncated) {
+      this.logger.warn( `Profiling truncated at ${this.options.maxRowsProfiled} of ${validRowCount} rows.`);
+    }
+    if(skippedCount > 0) this.logger.warn(`Skipped ${skippedCount} malformed row(s)`);
+    return {
+      rowCount: validRowCount,
       columnCount: headers.length,
       truncated,
+      skippedRowCount: skippedCount,
       columns: headers.map((name) => this.profileColumn(name, rows)),
       sampleRows: rows.slice(0, this.options.sampleRows),
     };
@@ -112,22 +114,6 @@ export class CsvProfileService {
     }
     return column;
   }
-
-    private parseOrThrow(csvContent: string): Record<string, string>[] {
-      try {
-        return parse<Record<string, string>>(csvContent, {
-          columns: true,
-          skipEmptyLines: true,
-          trim: true,
-          bom: true,
-          relax_column_count: true, //dipshits adding extra commas 
-          relax_quotes: true //  instead of using the actual character for he abreviation they use the ascII character because fuck you
-        })
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "unknown parse faliure";
-        throw new UnprocessableEntityException(`Could not parse CSV :${message}`);
-      }
-    }
 
   private inferType(values: string[]): InferredType {
     if (values.length === 0) return 'string';

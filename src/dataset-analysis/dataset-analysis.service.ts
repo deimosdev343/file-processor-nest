@@ -43,7 +43,7 @@ export class DatasetAnalysisService {
      private readonly profiler: CsvProfileService,
   ) {}
   async analyze(csvContent: string) : Promise<DatasetAnalysisResult> {
-    const profile =  this.profiler.profile(csvContent);
+    const profile =  await this.profiler.profile(csvContent);
     const analysis = await this.interpret(profile);
     return { profile, analysis };
   }

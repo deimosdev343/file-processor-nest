@@ -26,6 +26,7 @@ export interface DatasetProfile {
   rowCount: number;
   columnCount: number;
   truncated: boolean;
+  skippedRowCount: number;
   columns: ColumnProfile[];
   sampleRows: Record<string, string>[]
 }
