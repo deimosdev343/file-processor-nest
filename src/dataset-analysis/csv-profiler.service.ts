@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger, UnprocessableEntityException } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
-import { parse } from 'csv-parse/sync';
+import { parse } from 'csv-parse';
 
 import { ColumnProfile, DatasetProfile, InferredType } from './interfaces/dataset.profile';
 import dataAnalysisConfig from './data-analysis.config';
@@ -59,7 +59,13 @@ export class CsvProfileService {
     const skippedLines: number[] = [];
     let validRowCount = 0;
     let skippedCount = 0;
-    
+
+    parser.on('skip', (err: { lines: number; code: string }) => {
+    skippedCount++;
+    skippedLines.push(err.lines);
+  });
+
+
   }
 
   private profileColumn(name: string, rows: Record<string, string>[]): ColumnProfile {
