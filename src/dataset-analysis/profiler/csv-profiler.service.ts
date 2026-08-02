@@ -2,8 +2,8 @@ import { Inject, Injectable, Logger, UnprocessableEntityException } from '@nestj
 import type { ConfigType } from '@nestjs/config';
 import { parse } from 'csv-parse';
 
-import { ColumnProfile, DatasetProfile, InferredType } from './interfaces/dataset.profile';
-import dataAnalysisConfig from './data-analysis.config';
+import { ColumnProfile, DatasetProfile, InferredType } from '../interfaces/dataset.profile';
+import dataAnalysisConfig from '../data-analysis.config';
 
 //regex for checking whether field is a date
 const DATE_RE = /^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2})?)?/;

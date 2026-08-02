@@ -10,7 +10,7 @@ import OpenAI from 'openai';
 import { zodResponseFormat } from 'openai/helpers/zod';
 
 import { OPENAI_CLIENT } from 'src/open-ai/open-ai.constants';
-import { CsvProfileService } from './csv-profiler.service';
+import { CsvProfileService } from './profiler/csv-profiler.service';
 import DatasetAnalysisConfig from './data-analysis.config';
 import { DatasetProfile } from './interfaces/dataset.profile';
 import { DatasetAnalysis, DatasetAnalysisSchema } from './schemas/dataset-analysis.schema';
