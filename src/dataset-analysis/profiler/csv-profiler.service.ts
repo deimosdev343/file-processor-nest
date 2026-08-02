@@ -21,8 +21,8 @@ export class CsvProfileService {
     @Inject(dataAnalysisConfig.KEY) private readonly options: ConfigType<typeof dataAnalysisConfig>
   ) {}
 
-  async profile(csvContent: string): Promise<DatasetProfile> {
-    const { rows, validRowCount, skippedCount, skippedLines } = await this.collectRows(csvContent);
+  async profile(csvContent: string, delimiter: string): Promise<DatasetProfile> {
+    const { rows, validRowCount, skippedCount, skippedLines } = await this.collectRows(csvContent, delimiter);
     const headers = rows.length ? Object.keys(rows[0]) : [];
     if(headers.length == 0) {
       throw new UnprocessableEntityException("CSV contains no parseable data rows.");
@@ -42,7 +42,7 @@ export class CsvProfileService {
     };
   }
   
-  private async collectRows(csvContent:string) :Promise<{
+  private async collectRows(csvContent:string, delimiter:string) :Promise<{
     rows: Record<string, string>[],
     validRowCount:number,
     skippedCount:number,
@@ -53,6 +53,7 @@ export class CsvProfileService {
       skipEmptyLines: true,
       trim: true,
       bom: true,
+      delimiter,
       relax_column_count: true, //dipshits adding extra commas 
       relax_quotes: true //  instead of using the actual character for he abreviation they use the ascII character because fuck you
         

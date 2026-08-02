@@ -4,6 +4,7 @@ import {
   MaxFileSizeValidator,
   ParseFilePipe,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -11,6 +12,7 @@ import type { ConfigType } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express';
 import datasetAnalysisConfig from './data-analysis.config';
 import { DatasetAnalysisService, DatasetAnalysisResult } from './dataset-analysis.service';
+import { ParseDelimiterPipe } from './profiler/csv-profiler-delimter.pipe';
 
 
 @Controller('dataset-analysis')
@@ -24,13 +26,14 @@ export class DatasetAnalysisController {
   @UseInterceptors(FileInterceptor('file'))
   async analyze(
         @UploadedFile(
-      new ParseFilePipe({
-        validators: [new MaxFileSizeValidator({ maxSize: 50 * 1024 * 1024 })],
-        fileIsRequired: true,
-      }),
+        new ParseFilePipe({
+          validators: [new MaxFileSizeValidator({ maxSize: 50 * 1024 * 1024 })],
+          fileIsRequired: true,
+        }),
     )
-    file: Express.Multer.File
+    file: Express.Multer.File,
+    @Query('delimter', ParseDelimiterPipe) delimiter: string
   ) {
-      return this.datasetAnalysisService.analyze(file.buffer.toString('utf-8'));
+      return this.datasetAnalysisService.analyze(file.buffer.toString('utf-8'), delimiter);
   }
 }

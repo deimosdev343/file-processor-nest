@@ -42,8 +42,8 @@ export class DatasetAnalysisService {
     @Inject(DatasetAnalysisConfig.KEY) private readonly options: ConfigType<typeof DatasetAnalysisConfig>,
      private readonly profiler: CsvProfileService,
   ) {}
-  async analyze(csvContent: string) : Promise<DatasetAnalysisResult> {
-    const profile =  await this.profiler.profile(csvContent);
+  async analyze(csvContent: string, delimiter: string) : Promise<DatasetAnalysisResult> {
+    const profile =  await this.profiler.profile(csvContent, delimiter);
     const analysis = await this.interpret(profile);
     return { profile, analysis };
   }
