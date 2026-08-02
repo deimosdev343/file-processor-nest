@@ -54,6 +54,7 @@ export class CsvProfileService {
       trim: true,
       bom: true,
       delimiter,
+      skip_records_with_error: true,
       relax_column_count: true, //dipshits adding extra commas 
       relax_quotes: true //  instead of using the actual character for he abreviation they use the ascII character because fuck you
         
