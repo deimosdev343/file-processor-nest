@@ -22,11 +22,7 @@ export class CsvProfileService {
   ) {}
 
   createColumnHeaders(csvRow: string, delimter: string): string[] {
-    const split_csv_rows = csvRow.split(delimter || ',');
-    for(const [row,index] of split_csv_rows) {
-      split_csv_rows[index] = `column${index}`;
-    }
-    return split_csv_rows;
+    return csvRow.split(delimter || ',').map((_, i) => `column${i}`);
   }
 
   async profile(csvContent: string, delimiter: string): Promise<DatasetProfile> {
