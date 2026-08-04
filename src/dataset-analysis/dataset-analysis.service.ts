@@ -44,7 +44,11 @@ export class DatasetAnalysisService {
   createColumnHeader(csvRow: string, delimiter: string): string[] {
     return this.profiler.createColumnHeaders(csvRow, delimiter);
   }
-  async analyze(csvContent: string, delimiter: string) : Promise<DatasetAnalysisResult> {
+  takeLinke(csvContent: string, row: number): string {
+    return csvContent.split("/n")[row];
+  }
+  async analyze(csvContent: string, delimiter: string, row ?: number) : Promise<DatasetAnalysisResult> {
+
     const profile =  await this.profiler.profile(csvContent, delimiter);
     const analysis = await this.interpret(profile);
     return {  analysis };
