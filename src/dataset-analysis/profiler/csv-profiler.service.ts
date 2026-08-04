@@ -21,6 +21,14 @@ export class CsvProfileService {
     @Inject(dataAnalysisConfig.KEY) private readonly options: ConfigType<typeof dataAnalysisConfig>
   ) {}
 
+  createColumnHeaders(csvRow: string, delimter: string): string[] {
+    const split_csv_rows = csvRow.split(delimter || ',');
+    for(const [row,index] of split_csv_rows) {
+      split_csv_rows[index] = `column${index}`;
+    }
+    return split_csv_rows;
+  }
+
   async profile(csvContent: string, delimiter: string): Promise<DatasetProfile> {
     const { rows, validRowCount, skippedCount, skippedLines } = await this.collectRows(csvContent, delimiter);
     const headers = rows.length ? Object.keys(rows[0]) : [];
