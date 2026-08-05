@@ -41,15 +41,18 @@ export class DatasetAnalysisService {
     @Inject(DatasetAnalysisConfig.KEY) private readonly options: ConfigType<typeof DatasetAnalysisConfig>,
      private readonly profiler: CsvProfileService,
   ) {}
-  createColumnHeader(csvRow: string, delimiter: string): string[] {
+  createColumnHeaders(csvRow: string, delimiter: string): string[] {
     return this.profiler.createColumnHeaders(csvRow, delimiter);
   }
-  takeLinke(csvContent: string, row: number): string {
-    return csvContent.split("/n")[row];
+  takeLine(csvContent: string, row: number): string {
+    return this.profiler.takeLine(csvContent, row)
   }
   async analyze(csvContent: string, delimiter: string, row ?: number) : Promise<DatasetAnalysisResult> {
+    const columns = row !== undefined
+    ? this.createColumnHeaders(this.takeLine(csvContent, row), delimiter)
+    : [];
 
-    const profile =  await this.profiler.profile(csvContent, delimiter);
+    const profile =  await this.profiler.profile(csvContent, delimiter, columns);
     const analysis = await this.interpret(profile);
     return {  analysis };
   }

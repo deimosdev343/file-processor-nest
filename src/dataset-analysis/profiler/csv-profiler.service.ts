@@ -24,9 +24,11 @@ export class CsvProfileService {
   createColumnHeaders(csvRow: string, delimter: string): string[] {
     return csvRow.split(delimter || ',').map((_, i) => `column${i}`);
   }
-
-  async profile(csvContent: string, delimiter: string): Promise<DatasetProfile> {
-    const { rows, validRowCount, skippedCount, skippedLines } = await this.collectRows(csvContent, delimiter);
+  takeLine(csvContent: string, row: number): string {
+    return csvContent.split("/n")[row];
+  }
+  async profile(csvContent: string, delimiter: string, columns: string[]): Promise<DatasetProfile> {
+    const { rows, validRowCount, skippedCount, skippedLines } = await this.collectRows(csvContent, delimiter, columns);
     const headers = rows.length ? Object.keys(rows[0]) : [];
     if(headers.length == 0) {
       throw new UnprocessableEntityException("CSV contains no parseable data rows.");
@@ -46,7 +48,7 @@ export class CsvProfileService {
     };
   }
   
-  private async collectRows(csvContent:string, delimiter:string) :Promise<{
+  private async collectRows(csvContent:string, delimiter:string, columns: string[]) :Promise<{
     rows: Record<string, string>[],
     validRowCount:number,
     skippedCount:number,
