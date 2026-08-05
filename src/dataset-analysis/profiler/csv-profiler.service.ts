@@ -25,7 +25,7 @@ export class CsvProfileService {
     return csvRow.split(delimter || ',').map((_, i) => `column${i}`);
   }
   takeLine(csvContent: string, row: number): string {
-    return csvContent.split("/n")[row];
+    return csvContent.split(`\n`)[row];
   }
   async profile(csvContent: string, delimiter: string, columns: string[]): Promise<DatasetProfile> {
     const { rows, validRowCount, skippedCount, skippedLines } = await this.collectRows(csvContent, delimiter, columns);
@@ -55,7 +55,7 @@ export class CsvProfileService {
     skippedLines: number[]
   }> {
     const parser = parse(csvContent, {
-      columns: true,
+      columns: columns?.length > 1 ? columns : true,
       skipEmptyLines: true,
       trim: true,
       bom: true,

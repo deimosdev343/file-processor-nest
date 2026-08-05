@@ -40,12 +40,11 @@ export class DatasetAnalysisController {
         }),
     )
     file: Express.Multer.File,
-    @Query('delimter', ParseDelimiterPipe) delimiter: string
+    @Query('delimter', ParseDelimiterPipe) delimiter: string,
+    @Query('row') row: number
   ) {
-      return this.datasetAnalysisService.analyze(file.buffer.toString('utf-8'), delimiter);
+      return this.datasetAnalysisService.analyze(file.buffer.toString('utf-8'), delimiter, row);
   }
-  @Post("columns")
-  async createHeaders(@Body() csvHeadersDto: CsvHeadersDto) {
-    return this.datasetAnalysisService.createColumnHeader(csvHeadersDto.csvRow, csvHeadersDto.delimiter);   
-  }
+  
+  
 }
