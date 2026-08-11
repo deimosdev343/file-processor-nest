@@ -11,18 +11,17 @@ export const SemanticRole = z.enum([
 ]);
 
 export const ColumnAnalysisSchema = z.object({
+  name: z.string(),
   semanticRole: SemanticRole,
   description: z.string().describe('What this column represents, in one sentence.'),
   unit: z.string().nullable().describe('e.g. USD, kg, seconds, percent. Null if unitless.'),
   isPii: z.boolean(),
   qualityIssues: z.array(z.string()).describe('Empty array if none observed.'),
-  columnNumber: z.number().describe("the column number"),
-  issues: z.array(z.string()).describe("problem that may arise when working with this column")
 });
 
 
 export const MetricSchema = z.object({
-  columnNumber: z.number().describe("the column number"),
+  name: z.string(),
   description: z.string(),
   aggregation: z.enum([
     'sum',
@@ -45,10 +44,12 @@ export const MetricSchema = z.object({
 
 
 export const DatasetAnalysisSchema = z.object({
-
   domain: z.string().describe('What subject area this dataset comes from.'),
   grain: z.string().describe('What one row represents, e.g. "one row per order line item".'),
+  primaryKeyCandidates: z.array(z.string()),
+  timeColumn: z.string().nullable(),
   columns: z.array(ColumnAnalysisSchema),
+  metrics: z.array(MetricSchema),
   caveats: z.array(z.string()),
 });
  
