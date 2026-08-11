@@ -28,6 +28,7 @@ Rules:
   - Set confidence to "low" when the column's meaning is ambiguous from its name and values
 `
 export interface DatasetAnalysisResult {
+  profile: DatasetProfile;
   analysis: DatasetAnalysis;
 }
 
@@ -54,7 +55,7 @@ export class DatasetAnalysisService {
 
     const profile =  await this.profiler.profile(csvContent, delimiter, columns);
     const analysis = await this.interpret(profile);
-    return {  analysis };
+    return { profile, analysis };
   }
 
   private async interpret(profile: DatasetProfile) {
