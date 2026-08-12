@@ -13,7 +13,7 @@ import { OPENAI_CLIENT } from 'src/open-ai/open-ai.constants';
 import { CsvProfileService } from './profiler/csv-profiler.service';
 import DatasetAnalysisConfig from './data-analysis.config';
 import { DatasetProfile } from './interfaces/dataset.profile';
-import { DatasetAnalysis, DatasetAnalysisSchema } from './schemas/dataset-analysis.schema';
+import { DatasetAnalysis, DatasetAnalysisSchema, OutputProfile } from './schemas/dataset-analysis.schema';
 
 const SYSTEM_PROMPT = `You are a dataset analyst, you are given a statistical profile of a tabular dataset, plus a few sample rows.
 
@@ -48,14 +48,33 @@ export class DatasetAnalysisService {
   takeLine(csvContent: string, row: number): string {
     return this.profiler.takeLine(csvContent, row)
   }
-  async analyze(csvContent: string, delimiter: string, row ?: number) : Promise<DatasetAnalysisResult> {
+  async analyze(csvContent: string, delimiter: string, row ?: number) : Promise<any> {
     const columns = row !== undefined
     ? this.createColumnHeaders(this.takeLine(csvContent, row), delimiter)
     : [];
 
-    const profile =  await this.profiler.profile(csvContent, delimiter, columns);
+    const profile = await this.profiler.profile(csvContent, delimiter, columns);
     const analysis = await this.interpret(profile);
-    return { profile, analysis };
+    const analyzedProfile: OutputProfile[] = []
+
+    for(let i = 0; i< profile.columns.length; i++) {
+      analyzedProfile.push({
+        name: profile.columns[i].name,
+        inferredType: profile.columns[i].inferredType,
+        nullCount: profile.columns[i].nullCount,
+        nullFraction: profile.columns[i].nullFraction,
+        distinctCount: profile.columns[i].distinctCount,
+        distinctFraction: profile.columns[i].distinctFraction,
+        sampleValues: profile.columns[i].sampleValues,
+        numeric: profile.columns[i].numeric,
+        semanticRole: analysis.columns[i].semanticRole,
+        description: analysis.columns[i].description,
+        unit: analysis.columns[i].unit,
+        qualityIssues: analysis.columns[i].qualityIssues
+      });
+    }
+
+    return { analyzedProfile };
   }
 
   private async interpret(profile: DatasetProfile) {

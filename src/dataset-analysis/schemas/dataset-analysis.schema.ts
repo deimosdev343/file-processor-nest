@@ -1,4 +1,5 @@
 import {z} from 'zod';
+import { ColumnProfile } from '../interfaces/dataset.profile';
 
 export const SemanticRole = z.enum([
   'identifier',
@@ -56,3 +57,9 @@ export const DatasetAnalysisSchema = z.object({
 export type ColumnAnalysis = z.infer<typeof ColumnAnalysisSchema>;
 export type Metric = z.infer<typeof MetricSchema>;
 export type DatasetAnalysis = z.infer<typeof DatasetAnalysisSchema>;
+export interface OutputProfile extends ColumnProfile {
+  semanticRole: string,
+  description: string,
+  unit: string | null,
+  qualityIssues: string[],
+}
