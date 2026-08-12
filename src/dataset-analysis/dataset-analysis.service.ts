@@ -48,7 +48,7 @@ export class DatasetAnalysisService {
   takeLine(csvContent: string, row: number): string {
     return this.profiler.takeLine(csvContent, row)
   }
-  async analyze(csvContent: string, delimiter: string, row ?: number) : Promise<any> {
+  async analyze(csvContent: string, delimiter: string, row ?: number) : Promise<{analyzedProfile: OutputProfile[]}> {
     const columns = row !== undefined
     ? this.createColumnHeaders(this.takeLine(csvContent, row), delimiter)
     : [];
