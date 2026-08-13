@@ -40,7 +40,7 @@ export class DatasetAnalysisController {
         }),
     )
     file: Express.Multer.File,
-    @Query('delimter', ParseDelimiterPipe) delimiter: string,
+    @Query('delimiter', ParseDelimiterPipe) delimiter: string,
     @Query('row') row: number
   ) {
       return this.datasetAnalysisService.analyze(file.buffer.toString('utf-8'), delimiter, row);
