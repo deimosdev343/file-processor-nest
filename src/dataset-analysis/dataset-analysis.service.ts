@@ -72,9 +72,9 @@ export class DatasetAnalysisService {
         unit: analysis.columns[i].unit,
         qualityIssues: analysis.columns[i].qualityIssues,
         isPii: analysis.columns[i].isPii,
-        aggregation: analysis.metrics[i].aggregation,
-        metricDescription: analysis.metrics[i].description,
-        sqlExpression: analysis.metrics[i].expression
+        aggregation: analysis.metrics[i]?.aggregation,
+        metricDescription: analysis.metrics[i]?.description,
+        sqlExpression: analysis.metrics[i]?.expression
       });
     }
 
