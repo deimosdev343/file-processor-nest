@@ -60,6 +60,10 @@ export type DatasetAnalysis = z.infer<typeof DatasetAnalysisSchema>;
 export interface OutputProfile extends ColumnProfile {
   semanticRole: string,
   description: string,
+  isPii: boolean
   unit: string | null,
   qualityIssues: string[],
+  aggregation: string,
+  metricDescription: string,
+  sqlExpression: string
 }

@@ -70,7 +70,11 @@ export class DatasetAnalysisService {
         semanticRole: analysis.columns[i].semanticRole,
         description: analysis.columns[i].description,
         unit: analysis.columns[i].unit,
-        qualityIssues: analysis.columns[i].qualityIssues
+        qualityIssues: analysis.columns[i].qualityIssues,
+        isPii: analysis.columns[i].isPii,
+        aggregation: analysis.metrics[i].aggregation,
+        metricDescription: analysis.metrics[i].description,
+        sqlExpression: analysis.metrics[i].expression
       });
     }
 
