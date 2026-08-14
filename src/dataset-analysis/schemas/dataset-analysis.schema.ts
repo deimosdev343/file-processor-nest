@@ -63,7 +63,4 @@ export interface OutputProfile extends ColumnProfile {
   isPii: boolean
   unit: string | null,
   qualityIssues: string[],
-  aggregation?: string,
-  metricDescription?: string,
-  sqlExpression?: string
 }

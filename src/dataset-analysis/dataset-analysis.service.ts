@@ -13,7 +13,7 @@ import { OPENAI_CLIENT } from 'src/open-ai/open-ai.constants';
 import { CsvProfileService } from './profiler/csv-profiler.service';
 import DatasetAnalysisConfig from './data-analysis.config';
 import { DatasetProfile } from './interfaces/dataset.profile';
-import { DatasetAnalysis, DatasetAnalysisSchema, OutputProfile } from './schemas/dataset-analysis.schema';
+import { DatasetAnalysis, DatasetAnalysisSchema, Metric, OutputProfile } from './schemas/dataset-analysis.schema';
 
 const SYSTEM_PROMPT = `You are a dataset analyst, you are given a statistical profile of a tabular dataset, plus a few sample rows.
 
@@ -48,7 +48,11 @@ export class DatasetAnalysisService {
   takeLine(csvContent: string, row: number): string {
     return this.profiler.takeLine(csvContent, row)
   }
-  async analyze(csvContent: string, delimiter: string, row ?: number) : Promise<{analyzedProfile: OutputProfile[]}> {
+  async analyze(csvContent: string, delimiter: string, row ?: number) : Promise<{
+    analyzedProfile: OutputProfile[]
+    metrics: Metric[]
+    caveats: string[]
+  }> {
     const columns = row !== undefined
     ? this.createColumnHeaders(this.takeLine(csvContent, row), delimiter)
     : [];
@@ -72,13 +76,11 @@ export class DatasetAnalysisService {
         unit: analysis.columns[i].unit,
         qualityIssues: analysis.columns[i].qualityIssues,
         isPii: analysis.columns[i].isPii,
-        aggregation: analysis.metrics[i]?.aggregation,
-        metricDescription: analysis.metrics[i]?.description,
-        sqlExpression: analysis.metrics[i]?.expression
+
       });
     }
 
-    return { analyzedProfile };
+    return {metrics: analysis.metrics,caveats: analysis.caveats, analyzedProfile  };
   }
 
   private async interpret(profile: DatasetProfile) {
