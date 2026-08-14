@@ -6,6 +6,7 @@ import { writeFile, unlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { MetricResult, MetricBreakdown } from './metric-analysis.interfaces';
+import { Metric } from '../schemas/dataset-analysis.schema';
 
 const TBL = 'dataset';
 const BREAKDOWN_LIMIT = 50;
@@ -14,6 +15,31 @@ const BREAKDOWN_LIMIT = 50;
 export class MetricAnalysisService {
   private readonly logger = new Logger(MetricAnalysisService.name);
   
+  private async runMetric(conn: any, metric: Metric, known: Set<string>) {
+    const base: MetricResult = {
+      name: metric.name,
+      expression: metric.expression,
+      confidence: metric.confidence,
+      overall: null,
+      breakdowns: []
+    };
+
+    const missing = metric.requiredColumns.filter((c) => !known.has(c));
+    if (missing.length) {
+      return { ...base, skipped: `references unknown column(s): ${missing.join(', ')}` };
+    }
+
+    try {
+      const rows = await this.select(conn, `SELECT (${metric.expression}) AS value FROM ${TBL}`);
+      base.overall = this.toNum(rows[0]?.value);
+    } catch (err) {
+      return { ...base, error: this.msg(err) }; // whole metric failed; don't attempt breakdowns
+    }
+    for(const col of metric.suggestedBreakdowns) {
+      
+    }
+  }
+
   private async select(conn: any, sql: string): Promise<Record<string, unknown>[]> {
     const reader = await conn.runAndReadAll(sql);
     return reader.getRowObjects();
