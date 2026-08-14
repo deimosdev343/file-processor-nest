@@ -11,7 +11,26 @@ const TBL = 'dataset';
 const BREAKDOWN_LIMIT = 50;
 
 @Injectable()
-export class MetricExecutorService {
-  private readonly logger = new Logger(MetricExecutorService.name);
+export class MetricAnalysisService {
+  private readonly logger = new Logger(MetricAnalysisService.name);
   
+  private async select(conn: any, sql: string): Promise<Record<string, unknown>[]> {
+    const reader = await conn.runAndReadAll(sql);
+    return reader.getRowObjects();
+  }
+
+  private toNum(v: unknown): number | null {
+    if (v == null) return null;
+    if (typeof v === 'bigint') return Number(v); // COUNT etc. come back as BigInt
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  private quote(id: string): string {
+    return `"${id.replace(/"/g, '""')}"`;
+  }
+
+  private msg(err: unknown): string {
+    return err instanceof Error ? err.message : 'unknown execution error';
+  }
 }
