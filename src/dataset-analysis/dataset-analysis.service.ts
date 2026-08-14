@@ -59,28 +59,24 @@ export class DatasetAnalysisService {
 
     const profile = await this.profiler.profile(csvContent, delimiter, columns);
     const analysis = await this.interpret(profile);
-    const analyzedProfile: OutputProfile[] = []
+    const byName = new Map(analysis.columns.map(c => [c.name, c]));
 
-    for(let i = 0; i< profile.columns.length; i++) {
-      analyzedProfile.push({
-        name: profile.columns[i].name,
-        inferredType: profile.columns[i].inferredType,
-        nullCount: profile.columns[i].nullCount,
-        nullFraction: profile.columns[i].nullFraction,
-        distinctCount: profile.columns[i].distinctCount,
-        distinctFraction: profile.columns[i].distinctFraction,
-        sampleValues: profile.columns[i].sampleValues,
-        numeric: profile.columns[i].numeric,
-        semanticRole: analysis.columns[i].semanticRole,
-        description: analysis.columns[i].description,
-        unit: analysis.columns[i].unit,
-        qualityIssues: analysis.columns[i].qualityIssues,
-        isPii: analysis.columns[i].isPii,
+    const analyzedProfile: OutputProfile[] = profile.columns.map((col) => {
+      const analysisContent = byName.get(col.name);
+      if (!analysisContent) {
+        throw new UnprocessableEntityException(`Model omitted column "${col.name}".`);
+      }
+      return {
+        ...col,
+        semanticRole: analysisContent.semanticRole,
+        description: analysisContent.description,
+        unit: analysisContent.unit,
+        qualityIssues: analysisContent.qualityIssues,
+        isPii: analysisContent.isPii,
+      };
+    })
 
-      });
-    }
-
-    return {metrics: analysis.metrics,caveats: analysis.caveats, analyzedProfile  };
+    return {metrics: analysis.metrics,caveats: analysis.caveats, analyzedProfile };
   }
 
   private async interpret(profile: DatasetProfile) {
