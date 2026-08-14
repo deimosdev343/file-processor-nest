@@ -24,6 +24,7 @@
     "migration:revert": "npm run typeorm migration:revert"
   },
   "dependencies": {
+    "@duckdb/node-api": "^1.5.5-r.4",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",
