@@ -42,10 +42,10 @@ export class DatasetAnalysisService {
     @Inject(DatasetAnalysisConfig.KEY) private readonly options: ConfigType<typeof DatasetAnalysisConfig>,
      private readonly profiler: CsvProfileService,
   ) {}
-  createColumnHeaders(csvRow: string, delimiter: string): string[] {
+  private createColumnHeaders(csvRow: string, delimiter: string): string[] {
     return this.profiler.createColumnHeaders(csvRow, delimiter);
   }
-  takeLine(csvContent: string, row: number): string {
+  private takeLine(csvContent: string, row: number): string {
     return this.profiler.takeLine(csvContent, row)
   }
   async analyze(csvContent: string, delimiter: string, row ?: number) : Promise<{
