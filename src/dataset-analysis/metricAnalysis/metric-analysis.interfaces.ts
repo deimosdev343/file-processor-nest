@@ -10,6 +10,6 @@ export interface MetricResult {
   confidence: Metric['confidence'];
   overall: number | null;
   breakdowns: MetricBreakdown[];
-  skipped?: string; // reason we didn't run it
-  error?: string;   // DuckDB error, if it failed
+  skipped?: string; 
+  error?: string;
 }
