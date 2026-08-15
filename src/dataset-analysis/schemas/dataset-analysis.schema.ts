@@ -23,7 +23,7 @@ export const ColumnAnalysisSchema = z.object({
 
 export const MetricSchema = z.object({
   name: z.string(),
-  description: z.string(),
+  description: z.string().describe("One plain sentence a non-technical person understands. No column names, no SQL, no aggregation jargon"),
   aggregation: z.enum([
     'sum',
     'avg',
