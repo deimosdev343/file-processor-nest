@@ -14,6 +14,8 @@ import { CsvProfileService } from './profiler/csv-profiler.service';
 import DatasetAnalysisConfig from './data-analysis.config';
 import { DatasetProfile } from './interfaces/dataset.profile';
 import { DatasetAnalysis, DatasetAnalysisSchema, Metric, OutputProfile } from './schemas/dataset-analysis.schema';
+import { MetricAnalysisService } from './metricAnalysis/metric-analysis.service';
+import { MetricResult } from './metricAnalysis/metric-analysis.interfaces';
 
 const SYSTEM_PROMPT = `You are a dataset analyst, you are given a statistical profile of a tabular dataset, plus a few sample rows.
 
@@ -40,8 +42,9 @@ export class DatasetAnalysisService {
   constructor(
     @Inject(OPENAI_CLIENT) private readonly openai: OpenAI,
     @Inject(DatasetAnalysisConfig.KEY) private readonly options: ConfigType<typeof DatasetAnalysisConfig>,
-     private readonly profiler: CsvProfileService,
-  ) {}
+    private readonly profiler: CsvProfileService,
+    private readonly metricAnalyzer: MetricAnalysisService
+  ) {}  
   private createColumnHeaders(csvRow: string, delimiter: string): string[] {
     return this.profiler.createColumnHeaders(csvRow, delimiter);
   }
@@ -51,7 +54,8 @@ export class DatasetAnalysisService {
   async analyze(csvContent: string, delimiter: string, row ?: number) : Promise<{
     analyzedProfile: OutputProfile[]
     metrics: Metric[]
-    caveats: string[]
+    caveats: string[],
+    metricResults: MetricResult[]
   }> {
     const columns = row !== undefined
     ? this.createColumnHeaders(this.takeLine(csvContent, row), delimiter)
@@ -75,8 +79,14 @@ export class DatasetAnalysisService {
         isPii: analysisContent.isPii,
       };
     })
-
-    return {metrics: analysis.metrics,caveats: analysis.caveats, analyzedProfile };
+    const metricResults = await this.metricAnalyzer.run(
+      csvContent,
+      delimiter,
+      profile.columns.map((c) => c.name),
+      row === undefined,
+      analysis.metrics,
+    );
+    return {metrics: analysis.metrics,caveats: analysis.caveats, analyzedProfile, metricResults };
   }
 
   private async interpret(profile: DatasetProfile) {

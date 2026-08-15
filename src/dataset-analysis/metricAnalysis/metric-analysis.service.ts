@@ -21,7 +21,7 @@ export class MetricAnalysisService {
     columnNames: string[],
     hasHeader: boolean,
     metrics: Metric[],
-  ) {
+  ): Promise<MetricResult[]> {
     const known = new Set(columnNames);
     const tmpPath = join(tmpdir(), `ds-${randomUUID()}.csv`);
     await writeFile(tmpPath, csvContent, 'utf-8');
@@ -41,7 +41,7 @@ export class MetricAnalysisService {
       for(const metric of metrics) {
         results.push(await this.runMetric(conn, metric, known));
       }
-      return metrics;
+      return results;
     } finally {
       await conn.closeSync?.();
       await unlink(tmpPath).catch(() => {});
