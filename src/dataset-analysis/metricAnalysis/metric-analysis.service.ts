@@ -15,6 +15,39 @@ const BREAKDOWN_LIMIT = 50;
 export class MetricAnalysisService {
   private readonly logger = new Logger(MetricAnalysisService.name);
   
+  async run(
+    csvContent: string,
+    delimiter: string,
+    columnNames: string[],
+    hasHeader: boolean,
+    metrics: Metric[],
+  ) {
+    const known = new Set(columnNames);
+    const tmpPath = join(tmpdir(), `ds-${randomUUID()}.csv`);
+    await writeFile(tmpPath, csvContent, 'utf-8');
+    
+    const instance = await DuckDBInstance.create(':memory:');
+    const conn = await instance.connect()
+    try {
+      const path = tmpPath.replace(/'/g, "''");
+      const delim = delimiter.replace(/'/g, "''");
+      const names = columnNames.map((n) => `'${n.replace(/'/g, "''")}'`).join(', ');
+      await conn.run(
+        `CREATE TABLE ${TBL} AS SELECT * FROM read_csv('${path}',
+           delim='${delim}', header=${hasHeader}, names=[${names}], ignore_errors=true)`,
+      );
+      await conn.run(`SET enable_external_access = false`);
+      const results: MetricResult[] = [];
+      for(const metric of metrics) {
+        results.push(await this.runMetric(conn, metric, known));
+      }
+      return metrics;
+    } finally {
+      await conn.closeSync?.();
+      await unlink(tmpPath).catch(() => {});
+    }
+  }
+
   private async runMetric(conn: any, metric: Metric, known: Set<string>) {
     const base: MetricResult = {
       name: metric.name,
