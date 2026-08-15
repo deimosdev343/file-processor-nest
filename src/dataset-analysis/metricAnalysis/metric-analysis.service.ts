@@ -53,6 +53,8 @@ export class MetricAnalysisService {
       name: metric.name,
       expression: metric.expression,
       confidence: metric.confidence,
+      aggregation: metric.aggregation,
+      description: metric.description,
       overall: null,
       breakdowns: []
     };

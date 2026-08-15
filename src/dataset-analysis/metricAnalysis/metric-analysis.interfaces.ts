@@ -8,6 +8,8 @@ export interface MetricResult {
   name: string;
   expression: string;
   confidence: Metric['confidence'];
+  description: string;
+  aggregation: Metric['aggregation'];
   overall: number | null;
   breakdowns: MetricBreakdown[];
   skipped?: string; 
