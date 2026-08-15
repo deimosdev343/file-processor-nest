@@ -36,8 +36,26 @@ export class MetricAnalysisService {
       return { ...base, error: this.msg(err) }; // whole metric failed; don't attempt breakdowns
     }
     for(const col of metric.suggestedBreakdowns) {
-      
+      if(!known.has(col)) continue;
+      const q = this.quote(col);
+      try {
+        const rows = await this.select(
+          conn,
+          `SELECT ${q} AS key, (${metric.expression}) AS value FROM ${TBL} GROUP BY ${q} ORDER BY value DESC NULLS LAST LIMIT ${BREAKDOWN_LIMIT}`,
+        );
+        base.breakdowns.push({
+          column: col,
+          rows: rows.map(r => ({
+            key: r.key == null ? null : String(r.key),
+            value: this.toNum(r.value)
+          }))
+        });
+
+      } catch (err) {
+         this.logger.warn(`Breakdown ${metric.name} by ${col} failed: ${this.msg(err)}`);
+      }
     }
+    return base;
   }
 
   private async select(conn: any, sql: string): Promise<Record<string, unknown>[]> {
