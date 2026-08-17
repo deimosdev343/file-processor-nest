@@ -85,6 +85,7 @@ export class DatasetAnalysisService {
       profile.columns.map((c) => c.name),
       row === undefined,
       analysis.metrics,
+      new Map(profile.columns.map((c) => [c.name, c.distinctCount]))
     );
     return {metrics: analysis.metrics,caveats: analysis.caveats, analyzedProfile, metricResults };
   }

@@ -10,6 +10,7 @@ import { Metric } from '../schemas/dataset-analysis.schema';
 
 const TBL = 'dataset';
 const BREAKDOWN_LIMIT = 50;
+const MAX_BREAKDOWN_CARDINALITY = 100;
 
 @Injectable()
 export class MetricAnalysisService {
@@ -21,6 +22,7 @@ export class MetricAnalysisService {
     columnNames: string[],
     hasHeader: boolean,
     metrics: Metric[],
+    cardinality: Map<string, number>
   ): Promise<MetricResult[]> {
     const known = new Set(columnNames);
     const tmpPath = join(tmpdir(), `ds-${randomUUID()}.csv`);
@@ -39,7 +41,7 @@ export class MetricAnalysisService {
       await conn.run(`SET enable_external_access = false`);
       const results: MetricResult[] = [];
       for(const metric of metrics) {
-        results.push(await this.runMetric(conn, metric, known));
+        results.push(await this.runMetric(conn, metric, cardinality));
       }
       return results;
     } finally {
@@ -48,7 +50,7 @@ export class MetricAnalysisService {
     }
   }
 
-  private async runMetric(conn: any, metric: Metric, known: Set<string>) {
+  private async runMetric(conn: any, metric: Metric, cardinality: Map<string, number>) {
     const base: MetricResult = {
       name: metric.name,
       expression: metric.expression,
@@ -59,7 +61,7 @@ export class MetricAnalysisService {
       breakdowns: []
     };
 
-    const missing = metric.requiredColumns.filter((c) => !known.has(c));
+    const missing = metric.requiredColumns.filter((c) => !cardinality.has(c));
     if (missing.length) {
       return { ...base, skipped: `references unknown column(s): ${missing.join(', ')}` };
     }
@@ -71,8 +73,10 @@ export class MetricAnalysisService {
       return { ...base, error: this.msg(err) }; // whole metric failed; don't attempt breakdowns
     }
     for(const col of metric.suggestedBreakdowns) {
-      if(!known.has(col)) continue;
-      const q = this.quote(col);
+      const distinct = cardinality.get(col);
+      if (distinct === undefined) continue;
+      if (distinct > MAX_BREAKDOWN_CARDINALITY) continue;
+      const q = this.quote(col); 
       try {
         const rows = await this.select(
           conn,
