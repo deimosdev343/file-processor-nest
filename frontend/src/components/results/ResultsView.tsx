@@ -1,0 +1,33 @@
+import type { AnalyzeResponse } from '../../types/api.types';
+
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return <h2 className="mb-3 text-sm font-semibold tracking-wide text-slate-500 uppercase">{children}</h2>;
+}
+
+export function ResultsView({data}: {data: AnalyzeResponse}) {
+  return (
+    <div className='grid gap-8'>
+      {data.caveats.length > 0 && (
+        <section className='rounded-xl border border-amber-200 bg-amber-50 p-4'>
+          <SectionTitle>
+            Cavets
+          </SectionTitle>
+          <ul className="list-disc pl-5 text-sm text-amber-900">
+            {data.caveats.map((c, i) => (
+              <li key={i}>{c}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+      <section>
+        <SectionTitle>Metrics</SectionTitle>
+        {/*MetricResults here */}
+      </section>
+      <section>
+        <SectionTitle>Columns {data.analyzedProfile.length}</SectionTitle>
+        {/*ColumnsTable here */}
+      </section>
+    </div>
+  )
+}
