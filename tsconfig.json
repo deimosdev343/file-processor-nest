@@ -3,6 +3,7 @@
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "resolvePackageJsonExports": true,
+    "jsx":"react-jsx",
     "esModuleInterop": true,
     "isolatedModules": true,
     "declaration": true,
@@ -22,6 +23,7 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "strictPropertyInitialization": false,
-    "types": ["node", "Multer"]
+    "types": ["node", "Multer"],
+    "exclude": ["frontend"]
   }
 }

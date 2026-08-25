@@ -1,4 +1,6 @@
 import type { AnalyzeResponse } from '../../types/api.types';
+import { ColumnsTable } from './ColumnsTable';
+import { MetricResults } from './MetricResults';
 
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
@@ -22,11 +24,11 @@ export function ResultsView({data}: {data: AnalyzeResponse}) {
       )}
       <section>
         <SectionTitle>Metrics</SectionTitle>
-        {/*MetricResults here */}
+        <MetricResults results={data.metricResults}/>
       </section>
       <section>
         <SectionTitle>Columns {data.analyzedProfile.length}</SectionTitle>
-        {/*ColumnsTable here */}
+        <ColumnsTable data={data.analyzedProfile}/>
       </section>
     </div>
   )

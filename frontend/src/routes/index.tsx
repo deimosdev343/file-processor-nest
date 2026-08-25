@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import AnaylzeForm from "#/components/AnaylzeForm";
 import { useAnalyzeDataset } from "#/hooks/UseAnalyzeDataset";
+import { ResultsView } from "#/components/results/ResultsView";
 
 export const Route = createFileRoute('/')({
   component: AnalyzePage
@@ -17,5 +18,6 @@ function AnalyzePage() {
       isPending={analysis.isPending}
       error={analysis.error}
     />
+    {analysis.data && <ResultsView data={analysis.data}/>}
   </div>
 }
