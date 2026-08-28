@@ -14,7 +14,7 @@ lerna-debug.log*
 venv
 # OS
 .DS_Store
-
+.vscode
 # Tests
 /coverage
 /.nyc_output
