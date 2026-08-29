@@ -39,3 +39,26 @@ def _to_num(v: object) -> float | int | None:
   if math.isnan(n) or math.isinf(n):
     return n
   
+class MetricRunner:
+  def run(
+        self,
+        csv_path: str,
+        delimiter: str,
+        column_names: list[str],
+        has_header: bool,
+        metrics: list[Metric],
+        cardinality: dict[str, int]
+  ) -> list[MetricResult]:
+    con = duckdb.connect(":memory:")
+    path = _sql_str(csv_path)
+    delim = _sql_str(delimiter)
+    names = ", ".join("'" + _sql_str(n) + "'" for n in column_names)
+    con.execute(
+      f"CREATE TABLE {TABLE} AS SELECT * FROM read_csv('{path}', "
+      f"delim='{delim}', header={'true' if has_header else 'false'}, "
+      f"names=[{names}], ignore_errors=true)"
+    )
+    con.execute("SET enable_external_access=false")
+    results =  [self._run_metric(con, m, cardinality) for m in metrics]
+    con.close()
+    return results
