@@ -37,7 +37,8 @@ def _to_num(v: object) -> float | int | None:
   except(TypeError, ValueError):
     return None
   if math.isnan(n) or math.isinf(n):
-    return n
+    return None
+  return n
 
 
 logger = logging.getLogger("metric-runner")
