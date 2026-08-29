@@ -38,7 +38,10 @@ def _to_num(v: object) -> float | int | None:
     return None
   if math.isnan(n) or math.isinf(n):
     return n
-  
+
+
+logger = logging.getLogger("metric-runner")
+
 class MetricRunner:
   def run(
         self,
@@ -62,3 +65,63 @@ class MetricRunner:
     results =  [self._run_metric(con, m, cardinality) for m in metrics]
     con.close()
     return results
+  
+  def _run_metric(
+    self, con: duckdb.DuckDBPyConnection, metric: Metric, cardinality: dict[str, int]
+  ) -> MetricResult:
+    base = MetricResult(
+      name=metric.name,
+      expression=metric.expression,
+      confidence=metric.confidence,
+      aggregation=metric.aggregation,
+      description=metric.description,
+      overall=None,
+      breakdowns=[],
+    )
+    missing = [c for c in metric.required_columns if c not in cardinality]
+    if missing:
+      base.skipped = f"references unknown column(s): {', '.join(missing)}"
+      return base
+
+    try: 
+      rows = con.execute(
+        f"SELECT ({metric.expression}) AS value FROM {TABLE}"
+      ).fetchall()
+      base.overall = _to_num(rows[0][0]) if rows else None
+    except Exception as err:
+      base.error = str(err) or "unknown execution error"
+      return base
+    
+    for col in metric.suggested_breakdowns:
+      distinct = cardinality.get(col)
+      if distinct is None:
+        continue
+      if distinct > MAX_BREAKDOWN_CARDINALITY:
+        continue
+    q = _quote_ident(col)
+    
+    try:
+      rows = con.execute(
+          f"SELECT {q} AS key, ({metric.expression}) AS value FROM {TABLE} "
+          f"GROUP BY {q} ORDER BY value DESC NULLS LAST LIMIT {BREAKDOWN_LIMIT}"
+      ).fetchall()
+      base.breakdowns.append(
+          Breakdown(
+              column=col,
+              rows=[
+                  BreakdownRow(
+                      key=None if r[0] is None else str(r[0]),
+                      value=_to_num(r[1]),
+                  )
+                  for r in rows
+              ],
+          )
+      )
+    except Exception as err:
+      logger.warning(
+          "Breakdown %s by %s failed: %s", metric.name, col, err
+      )
+    return base
+
+
+
