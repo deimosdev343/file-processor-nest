@@ -1,6 +1,6 @@
 import { Metric } from "../schemas/dataset-analysis.schema";
-
 export const METRIC_RUNNER = Symbol('METRIC_RUNNER');
+
 export interface MetricRunner {
   run(
     csvContent: string,

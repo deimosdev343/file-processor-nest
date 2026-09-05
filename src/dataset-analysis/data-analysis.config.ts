@@ -1,4 +1,5 @@
 import { registerAs } from "@nestjs/config";
+import { MetricRunner } from "./metricAnalysis/metric-analysis.interfaces";
 
 export interface DatasetAnalysis {
   model: string;
@@ -8,6 +9,7 @@ export interface DatasetAnalysis {
   maxUploadBytes: number;
   pythonServiceUrl: string;
   pythonTimeoutMs: number;
+  metricRunner: string;
 }
 
 export const DATASET_ANALYSIS_CONFIG = 'datasetAnalysis';
@@ -22,5 +24,6 @@ export default registerAs(
     maxUploadBytes: Number(process.env.DATASET_MAX_UPLOAD_BYTES ?? 50 * 1024 * 1024),
     pythonServiceUrl: process.env.PYTHON_ANALYSIS_URL ?? 'http://localhost:8100',
     pythonTimeoutMs: Number(process.env.PYTHON_ANALYSIS_TIMEOUT_MS ?? 30_000),
+    metricRunner: process.env.METRIC_RUNNER ?? 'node', 
   })
 )
