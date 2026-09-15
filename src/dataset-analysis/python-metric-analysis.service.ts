@@ -44,7 +44,28 @@ export class PythonMetricAnalysisService implements MetricRunner {
     const url = `${this.options.pythonServiceUrl.replace(/\/+$/, '')}/metrics`;
 
     let res: Response;
-    
+    try {
+      res = await fetch(url, {
+        method: 'POST',
+        body: form,
+        signal: AbortSignal.timeout(this.options.pythonTimeoutMs),
+      });
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : 'unknown transport error';
+      this.logger.error(`Metric service unreachable at ${url}: ${reason}`);
+      throw new ServiceUnavailableException('Metric analysis service is unavailable.');
+    }
+    if (res.status === 422) {
+      // The spec didn't validate against MetricsRequest — that's our bug, not theirs.
+      this.logger.error(`Metric service rejected the spec: ${await this.body(res)}`);
+      throw new UnprocessableEntityException('Metric spec rejected by the analysis service.');
+    }
+ 
+    if (!res.ok) {
+      this.logger.error(`Metric service returned ${res.status}: ${await this.body(res)}`);
+      throw new ServiceUnavailableException('Metric analysis service failed.');
+    }
+    return (await res.json()) as MetricResult[];
   }
 
   private async body(res: Response): Promise<string> {
