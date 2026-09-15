@@ -42,6 +42,17 @@ export class PythonMetricAnalysisService implements MetricRunner {
     form.append('file', new Blob([csvContent], { type: 'text/csv' }), 'dataset.csv');
     form.append('spec', spec);
     const url = `${this.options.pythonServiceUrl.replace(/\/+$/, '')}/metrics`;
+
+    let res: Response;
+    
+  }
+
+  private async body(res: Response): Promise<string> {
+    try {
+      return (await res.text()).slice(0, 500);
+    } catch {
+      return '<unreadable body>';
+    }
   }
 
 }
