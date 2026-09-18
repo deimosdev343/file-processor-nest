@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { writeFile, unlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { MetricResult, MetricBreakdown } from './metric-analysis.interfaces';
+import { MetricResult, MetricBreakdown, MetricRunner } from './metric-analysis.interfaces';
 import { Metric } from '../schemas/dataset-analysis.schema';
 
 const TBL = 'dataset';
@@ -13,7 +13,7 @@ const BREAKDOWN_LIMIT = 50;
 const MAX_BREAKDOWN_CARDINALITY = 100;
 
 @Injectable()
-export class MetricAnalysisService {
+export class MetricAnalysisService implements MetricRunner {
   private readonly logger = new Logger(MetricAnalysisService.name);
   
   async run(

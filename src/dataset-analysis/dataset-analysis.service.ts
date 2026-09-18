@@ -15,7 +15,8 @@ import DatasetAnalysisConfig from './data-analysis.config';
 import { DatasetProfile } from './interfaces/dataset.profile';
 import { DatasetAnalysis, DatasetAnalysisSchema, Metric, OutputProfile } from './schemas/dataset-analysis.schema';
 import { MetricAnalysisService } from './metricAnalysis/metric-analysis.service';
-import { MetricResult } from './metricAnalysis/metric-analysis.interfaces';
+import { METRIC_RUNNER } from './metricAnalysis/metric-analysis.interfaces';
+import type {  MetricResult, MetricRunner } from './metricAnalysis/metric-analysis.interfaces';
 
 const SYSTEM_PROMPT = `You are a dataset analyst, you are given a statistical profile of a tabular dataset, plus a few sample rows.
 
@@ -43,7 +44,7 @@ export class DatasetAnalysisService {
     @Inject(OPENAI_CLIENT) private readonly openai: OpenAI,
     @Inject(DatasetAnalysisConfig.KEY) private readonly options: ConfigType<typeof DatasetAnalysisConfig>,
     private readonly profiler: CsvProfileService,
-    private readonly metricAnalyzer: MetricAnalysisService
+    @Inject(METRIC_RUNNER) private readonly metricAnalyzer: MetricRunner  
   ) {}  
   private createColumnHeaders(csvRow: string, delimiter: string): string[] {
     return this.profiler.createColumnHeaders(csvRow, delimiter);
