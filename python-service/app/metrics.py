@@ -99,29 +99,29 @@ class MetricRunner:
         continue
       if distinct > MAX_BREAKDOWN_CARDINALITY:
         continue
-    q = _quote_ident(col)
-    
-    try:
-      rows = con.execute(
-          f"SELECT {q} AS key, ({metric.expression}) AS value FROM {TABLE} "
-          f"GROUP BY {q} ORDER BY value DESC NULLS LAST LIMIT {BREAKDOWN_LIMIT}"
-      ).fetchall()
-      base.breakdowns.append(
-          Breakdown(
-              column=col,
-              rows=[
-                  BreakdownRow(
-                      key=None if r[0] is None else str(r[0]),
-                      value=_to_num(r[1]),
-                  )
-                  for r in rows
-              ],
-          )
-      )
-    except Exception as err:
-      logger.warning(
-          "Breakdown %s by %s failed: %s", metric.name, col, err
-      )
+      q = _quote_ident(col)
+      
+      try:
+        rows = con.execute(
+            f"SELECT {q} AS key, ({metric.expression}) AS value FROM {TABLE} "
+            f"GROUP BY {q} ORDER BY value DESC NULLS LAST LIMIT {BREAKDOWN_LIMIT}"
+        ).fetchall()
+        base.breakdowns.append(
+            Breakdown(
+                column=col,
+                rows=[
+                    BreakdownRow(
+                        key=None if r[0] is None else str(r[0]),
+                        value=_to_num(r[1]),
+                    )
+                    for r in rows
+                ],
+            )
+        )
+      except Exception as err:
+        logger.warning(
+            "Breakdown %s by %s failed: %s", metric.name, col, err
+        )
     return base
 
 
