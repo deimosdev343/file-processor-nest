@@ -14,10 +14,8 @@ import { CsvProfileService } from './profiler/csv-profiler.service';
 import DatasetAnalysisConfig from './data-analysis.config';
 import { DatasetProfile } from './interfaces/dataset.profile';
 import { DatasetAnalysis, DatasetAnalysisSchema, Metric, OutputProfile } from './schemas/dataset-analysis.schema';
-import { MetricAnalysisService } from './metricAnalysis/metric-analysis.service';
-import { METRIC_RUNNER } from './metricAnalysis/metric-analysis.interfaces';
 import type {  MetricResult, MetricRunner } from './metricAnalysis/metric-analysis.interfaces';
-
+import { PythonMetricAnalysisService } from './python-metric-analysis.service';
 const SYSTEM_PROMPT = `You are a dataset analyst, you are given a statistical profile of a tabular dataset, plus a few sample rows.
 
 Your job SEMANTIC INTERPRETATION ONLY:
@@ -44,7 +42,7 @@ export class DatasetAnalysisService {
     @Inject(OPENAI_CLIENT) private readonly openai: OpenAI,
     @Inject(DatasetAnalysisConfig.KEY) private readonly options: ConfigType<typeof DatasetAnalysisConfig>,
     private readonly profiler: CsvProfileService,
-    @Inject(METRIC_RUNNER) private readonly metricAnalyzer: MetricRunner  
+    private readonly metricAnalyzer: PythonMetricAnalysisService  
   ) {}  
   private createColumnHeaders(csvRow: string, delimiter: string): string[] {
     return this.profiler.createColumnHeaders(csvRow, delimiter);

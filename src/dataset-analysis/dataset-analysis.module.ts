@@ -5,9 +5,7 @@ import { ConfigModule, ConfigType } from '@nestjs/config';
 import dataAnalysisConfig from './data-analysis.config';
 import { OpenAiModule } from 'src/open-ai/open-ai.module';
 import { CsvProfileService } from './profiler/csv-profiler.service';
-import { MetricAnalysisService } from './metricAnalysis/metric-analysis.service';
 import { PythonMetricAnalysisService } from './python-metric-analysis.service';
-import { METRIC_RUNNER } from './metricAnalysis/metric-analysis.interfaces';
 
 @Module({
   imports:[ConfigModule.forFeature(dataAnalysisConfig), OpenAiModule],
@@ -15,18 +13,8 @@ import { METRIC_RUNNER } from './metricAnalysis/metric-analysis.interfaces';
   providers: [
     CsvProfileService,
     DatasetAnalysisService,
-    MetricAnalysisService,
-    PythonMetricAnalysisService,
-    {
-      provide: METRIC_RUNNER,
-      inject:[dataAnalysisConfig.KEY, MetricAnalysisService, PythonMetricAnalysisService],
-      useFactory: (
-        cfg: ConfigType<typeof dataAnalysisConfig>,
-        node: MetricAnalysisService,
-        python: PythonMetricAnalysisService
-      ) => (cfg.metricRunner == 'python' ? python : node)
-    }
+    PythonMetricAnalysisService
   ],
-  exports:[DatasetAnalysisService, CsvProfileService, METRIC_RUNNER]
+  exports:[DatasetAnalysisService, CsvProfileService, PythonMetricAnalysisService]
 })
 export class DatasetAnalysisModule {}
