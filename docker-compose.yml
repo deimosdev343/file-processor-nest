@@ -1,0 +1,46 @@
+name: file-processor
+services:
+  api:
+    build:
+      context: .
+      target: runtime
+      args:
+        NODE_VERSION: 22-bookworm-slim
+    init: true                    # so SIGTERM reaches Node instead of PID 1
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # These override whatever .env says, because inside the network the
+      # services are reachable by name, not on localhost.
+      PORT: 8000
+      DB_HOST: mysql
+      DB_PORT: 3306
+      PYTHON_ANALYSIS_URL: ${PYTHON_ANALYSIS_URL:-http://host.docker.internal:8100}
+    ports:
+      - "${API_PORT:-8000}:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # needed on Linux; harmless elsewhere
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env — MySQL will not start with an empty root password}
+      MYSQL_DATABASE: ${DB_NAME:-dataset_analyzer}
+    ports:
+      - "${DB_EXPOSED_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+volumes:
+  mysql-data:
