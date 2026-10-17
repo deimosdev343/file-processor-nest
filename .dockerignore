@@ -1,0 +1,32 @@
+# Not part of the backend image (yet)
+frontend
+python-service
+redis
+
+node_modules
+dist
+build
+coverage
+
+test
+
+# Secrets must come from docker-compose
+.env
+.env.*
+
+# VCS, tooling, docs
+.git
+.gitignore
+.github
+.vscode
+.idea
+*.md
+diagram.webp
+.prettierrc
+eslint.config.mjs
+*.log
+npm-debug.log*
+
+# Python leftovers
+__pycache__
+venv
